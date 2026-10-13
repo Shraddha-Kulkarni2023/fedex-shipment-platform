@@ -1,27 +1,16 @@
-version: '3.8'
-
 services:
-  zookeeper:
-    image: debezium/zookeeper:2.7
-    container_name: zookeeper
-    ports:
-      - "2181:2181"
-      - "2888:2888"
-      - "3888:3888"
-
   kafka:
-    image: debezium/kafka:2.7
+    image: debezium/kafka:3.0.0.Final
     container_name: kafka
     ports:
       - "9092:9092"
-    links:
-      - zookeeper
-    depends_on:
-      - zookeeper
     environment:
-      - ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
-      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092
+      - CLUSTER_ID=oh-sxaDRTcyAr6pFRbXyzA
+      - NODE_ID=1
+      - NODE_ROLE=combined
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_LISTENERS=PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
 
   postgres:
     image: debezium/postgres:16
@@ -36,13 +25,10 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   connect:
-    image: debezium/connect:2.7
+    image: debezium/connect:3.0.0.Final
     container_name: connect
     ports:
       - "8083:8083"
-    links:
-      - kafka
-      - postgres
     depends_on:
       - kafka
       - postgres
