@@ -1,0 +1,23 @@
+server:
+  port: 8091
+
+spring:
+  application:
+    name: shipment-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/shipment_service_db
+    username: shipment_user
+    password: shipment_pass
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: shipment-service
+      auto-offset-reset: earliest
