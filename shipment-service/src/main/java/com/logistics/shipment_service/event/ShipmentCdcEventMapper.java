@@ -2,7 +2,9 @@ package com.logistics.shipment_service.event;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ShipmentCdcEventMapper {
 
     private final JsonMapper jsonMapper = JsonMapper.builder().build();
