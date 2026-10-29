@@ -2,6 +2,7 @@ package com.logistics.shipment_service.domain;
 
 import com.logistics.shipment_service.event.ShipmentCdcEvent;
 import com.logistics.shipment_service.event.ShipmentCreatedEvent;
+import com.logistics.shipment_service.event.ShipmentEventPublisher;
 import com.logistics.shipment_service.event.ShipmentUpdatedEvent;
 import org.springframework.stereotype.Component;
 
@@ -9,9 +10,12 @@ import org.springframework.stereotype.Component;
 public class ShipmentCdcEventHandler {
 
     private final ShipmentRepository shipmentRepository;
+    private final ShipmentEventPublisher shipmentEventPublisher;
 
-    public ShipmentCdcEventHandler(ShipmentRepository shipmentRepository) {
+    public ShipmentCdcEventHandler(ShipmentRepository shipmentRepository,
+                                    ShipmentEventPublisher shipmentEventPublisher) {
         this.shipmentRepository = shipmentRepository;
+        this.shipmentEventPublisher = shipmentEventPublisher;
     }
 
     public void handle(ShipmentCdcEvent event) {
@@ -29,5 +33,6 @@ public class ShipmentCdcEventHandler {
                 shipmentRepository.save(existingShipment);
             }
         }
+        shipmentEventPublisher.publish(event);
     }
 }
