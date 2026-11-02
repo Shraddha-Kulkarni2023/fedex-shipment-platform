@@ -2,10 +2,9 @@ package com.logistics.shipment_service.domain;
 
 import com.logistics.shipment_service.event.ShipmentCreatedEvent;
 
-import com.logistics.shipment_service.domain.Shipment;
-import com.logistics.shipment_service.domain.ShipmentCdcEventHandler;
-import com.logistics.shipment_service.domain.ShipmentRepository;
+
 import com.logistics.shipment_service.event.ShipmentUpdatedEvent;
+import com.logistics.shipment_service.event.ShipmentEventPublisher;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,15 +15,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
+
 @ExtendWith(MockitoExtension.class)
 class ShipmentCdcEventHandlerTest {
 
     @Mock
     private ShipmentRepository shipmentRepository;
 
+    @Mock
+    private ShipmentEventPublisher shipmentEventPublisher;
+
     @Test
     void shouldSaveNewShipmentWhenHandlingCreatedEvent() {
-        ShipmentCdcEventHandler handler = new ShipmentCdcEventHandler(shipmentRepository);
+        ShipmentCdcEventHandler handler = new ShipmentCdcEventHandler(shipmentRepository, shipmentEventPublisher);
         ShipmentCreatedEvent event = new ShipmentCreatedEvent(1L, "SHPA30F2460", "IN_TRANSIT");
 
         handler.handle(event);
@@ -36,11 +39,13 @@ class ShipmentCdcEventHandlerTest {
         assertThat(savedShipment.getId()).isEqualTo(1L);
         assertThat(savedShipment.getTrackingNumber()).isEqualTo("SHPA30F2460");
         assertThat(savedShipment.getStatus()).isEqualTo("IN_TRANSIT");
+
+        verify(shipmentEventPublisher).publish(event);
     }
 
-        @org.junit.jupiter.api.Test
+        @Test
     void shouldUpdateExistingShipmentWhenHandlingUpdatedEvent() {
-        ShipmentCdcEventHandler handler = new ShipmentCdcEventHandler(shipmentRepository);
+        ShipmentCdcEventHandler handler = new ShipmentCdcEventHandler(shipmentRepository, shipmentEventPublisher);
 
         Shipment existingShipment = new Shipment(1L, "SHPA30F2460", "IN_TRANSIT");
         org.mockito.Mockito.when(shipmentRepository.findById(1L))
@@ -56,5 +61,7 @@ class ShipmentCdcEventHandlerTest {
         Shipment savedShipment = captor.getValue();
         assertThat(savedShipment.getId()).isEqualTo(1L);
         assertThat(savedShipment.getStatus()).isEqualTo("DELIVERED");
-    }
+
+        verify(shipmentEventPublisher).publish(event);
+}
 }
